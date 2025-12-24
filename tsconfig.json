@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-
-    "target": "es6",
+    "module": "CommonJS",
+    "target": "ES2020",
+    "esModuleInterop": true,
     "types": ["node"],
     "sourceMap": true,
     "declaration": true,
@@ -18,13 +17,12 @@
     "strictPropertyInitialization": false,
     "allowSyntheticDefaultImports":  true,
     "strict": true,
-    "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
+    // "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
   },
-  "include": ["src"],
+  "include": ["src", "types"],
   "exclude": ["dist", "node_modules"]
 }

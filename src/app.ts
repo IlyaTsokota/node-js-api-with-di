@@ -2,42 +2,57 @@ import type { Express } from 'express';
 import type { Server } from 'http';
 
 import express from 'express';
-import type { UserController } from './users/user.controller.js';
-import type { ILogger } from './logger/logger.interface.js';
+import type { UserController } from './users/user.controller';
+import type { ILogger } from './logger/logger.interface';
 import { injectable, inject } from 'inversify';
-import { TYPES } from './types.js';
-import type { IExceptionFilter } from './errors/exception.filter.interface.js';
+import { TYPES } from './types';
+import type { IExceptionFilter } from './errors/exception.filter.interface';
+import bodyParser from 'body-parser';
+import type { IConfigService } from './config/config.service.interface';
+import type { IUserController } from './users/user.controller.interface';
+import type { PrismaService } from './database/prisma.service';
+import { AuthMiddleware } from './common/auth.middleware';
 
 @injectable()
 export class App {
-	private app: Express = express();
+    private app: Express = express();
 
-	private port = 8000;
+    private port = 8000;
 
-	private server: Server;
+    private server: Server;
 
-	constructor(
-		@inject(TYPES.ILogger) private logger: ILogger,
-		@inject(TYPES.UserController) private UserController: UserController,
-		@inject(TYPES.IExceptionFilter) private exceptionFilter: IExceptionFilter,
-	) {}
+    constructor(
+        @inject(TYPES.ILogger) private logger: ILogger,
+        @inject(TYPES.UserController) private userController: IUserController,
+        @inject(TYPES.ExceptionFilter) private exceptionFilter: IExceptionFilter,
+        @inject(TYPES.ConfigService) private configService: IConfigService,
+        @inject(TYPES.PrismaService) private prismaService: PrismaService,
+    ) {}
 
-	private useRoutes(): void {
-		this.app.use('/users', this.UserController.router);
-	}
+    private useMiddleware(): void {
+        this.app.use(bodyParser.json());
+        const authMiddleware = new AuthMiddleware(this.configService.get('JWT_SECRET'));
+        this.app.use(authMiddleware.execute.bind(authMiddleware));
+    }
 
-	private useExceptionFilters(): void {
-		this.app.use(this.exceptionFilter.catch.bind(this.exceptionFilter));
-	}
+    private useRoutes(): void {
+        this.app.use('/users', this.userController.router);
+    }
 
-	private createServer(): void {
-		this.server = this.app.listen(this.port);
-	}
+    private useExceptionFilters(): void {
+        this.app.use(this.exceptionFilter.catch.bind(this.exceptionFilter));
+    }
 
-	public async init(): Promise<void> {
-		this.useRoutes();
-		this.useExceptionFilters();
-		this.createServer();
-		this.logger.log(`Server is running on http://localhost:${this.port}!`);
-	}
+    private createServer(): void {
+        this.server = this.app.listen(this.port);
+    }
+
+    public async init(): Promise<void> {
+        this.useMiddleware();
+        this.useRoutes();
+        this.useExceptionFilters();
+        await this.prismaService.connect();
+        this.createServer();
+        this.logger.log(`Server is running on http://localhost:${this.port}!`);
+    }
 }
