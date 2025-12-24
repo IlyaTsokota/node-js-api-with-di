@@ -2,7 +2,6 @@ import type { Express } from 'express';
 import type { Server } from 'http';
 
 import express from 'express';
-import type { UserController } from './users/user.controller';
 import type { ILogger } from './logger/logger.interface';
 import { injectable, inject } from 'inversify';
 import { TYPES } from './types';
