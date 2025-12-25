@@ -3,7 +3,10 @@
     "module": "CommonJS",
     "target": "ES2020",
     "esModuleInterop": true,
-    "types": ["node", "jest"],
+    "types": [
+      "node",
+      "jest"
+    ],
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
@@ -17,7 +20,6 @@
     "strictPropertyInitialization": false,
     "allowSyntheticDefaultImports":  true,
     "strict": true,
-    // "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
