@@ -4,20 +4,20 @@ import type { ILogger } from '../logger/logger.interface';
 import { TYPES } from '../types';
 import { inject, injectable } from 'inversify';
 import { HTTPError } from '../errors/http-error.class';
-import type { IUserController } from './user.controller.interface';
+import type { IUsersController } from './users.controller.interface';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserRegisterDto } from './dto/user-register.dto';
-import type { IUserService } from './user.service.interface';
+import type { IUsersService } from './users.service.interface';
 import { ValidateMiddleware } from '../common/validate.middleware';
 import jsonwebtoken from 'jsonwebtoken';
 import type { IConfigService } from '../config/config.service.interface';
 import { AuthGuard } from '../common/auth.guard';
 
 @injectable()
-export class UserController extends BaseController implements IUserController {
+export class UsersController extends BaseController implements IUsersController {
     constructor(
         @inject(TYPES.ILogger) logger: ILogger,
-        @inject(TYPES.UserService) private userService: IUserService,
+        @inject(TYPES.UsersService) private UsersService: IUsersService,
         @inject(TYPES.ConfigService) private configService: IConfigService,
     ) {
         super(logger);
@@ -45,7 +45,7 @@ export class UserController extends BaseController implements IUserController {
     }
 
     public async info({ user }: Request, res: Response, next: NextFunction): Promise<void> {
-        const userInfo = await this.userService.getUserInfo(user);
+        const userInfo = await this.UsersService.getUserInfo(user);
 
         this.ok(res, { email: userInfo?.email, id: userInfo?.id });
     }
@@ -55,7 +55,7 @@ export class UserController extends BaseController implements IUserController {
         res: Response,
         next: NextFunction,
     ): Promise<void> {
-        const result = await this.userService.validateUser(body);
+        const result = await this.UsersService.validateUser(body);
 
         if (!result) {
             return next(new HTTPError(401, 'Error Login', 'login'));
@@ -71,7 +71,7 @@ export class UserController extends BaseController implements IUserController {
         res: Response,
         next: NextFunction,
     ): Promise<void> {
-        const result = await this.userService.createUser(body);
+        const result = await this.UsersService.createUser(body);
 
         if (!result) {
             return next(new HTTPError(422, 'This user already exists!', 'register'));

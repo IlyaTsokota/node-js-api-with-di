@@ -8,13 +8,13 @@ import { TYPES } from './types';
 import type { IExceptionFilter } from './errors/exception.filter.interface';
 import bodyParser from 'body-parser';
 import type { IConfigService } from './config/config.service.interface';
-import type { IUserController } from './users/user.controller.interface';
+import type { IUsersController } from './users/users.controller.interface';
 import type { PrismaService } from './database/prisma.service';
 import { AuthMiddleware } from './common/auth.middleware';
 
 @injectable()
 export class App {
-    private app: Express = express();
+    public app: Express = express();
 
     private port = 8000;
 
@@ -22,7 +22,7 @@ export class App {
 
     constructor(
         @inject(TYPES.ILogger) private logger: ILogger,
-        @inject(TYPES.UserController) private userController: IUserController,
+        @inject(TYPES.UsersController) private UsersController: IUsersController,
         @inject(TYPES.ExceptionFilter) private exceptionFilter: IExceptionFilter,
         @inject(TYPES.ConfigService) private configService: IConfigService,
         @inject(TYPES.PrismaService) private prismaService: PrismaService,
@@ -35,7 +35,7 @@ export class App {
     }
 
     private useRoutes(): void {
-        this.app.use('/users', this.userController.router);
+        this.app.use('/users', this.UsersController.router);
     }
 
     private useExceptionFilters(): void {
@@ -53,5 +53,9 @@ export class App {
         await this.prismaService.connect();
         this.createServer();
         this.logger.log(`Server is running on http://localhost:${this.port}!`);
+    }
+
+    public close(): void {
+        this.server.close();
     }
 }
